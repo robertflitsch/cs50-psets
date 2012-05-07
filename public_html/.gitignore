@@ -1,0 +1,9 @@
+
+core
+core.*
+*.bmp
+*.jpg
+*.jpeg
+*.raw
+texts/
+words

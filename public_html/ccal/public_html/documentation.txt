@@ -1,0 +1,76 @@
+    In its simplest form Crimson Calendars is the confluence of 
+two separate APIs, the first being CS50 Events and the other
+Google Calendar.  The intended use is to allow users to add 
+events to their Google Calendars in a fully automated 
+fashion as well as view the result, all on a single website
+. There are three primary pages, in that each is viewable 
+by a user, on the site. The first is the homepage, index.php,
+upon allowing access to one’s Google Calendar information 
+this is the page to which they are transferred. The next is 
+the Events Page, which lists events which may be added to one’s
+calendar. The third, final, and rather auxiliary page is 
+the list of Calendars which the site draws from. This is 
+purely for user benefits. This specification will provide
+ a guide on the basic methodology of using the site.
+
+    Upon entering the URL of Crimson Calendars into one’s 
+browser the user is taken to allow the site access to 
+their Google calendar through signing in using their 
+Google username and password and clicking to allow Crimson
+Calendars to view their information.  An important note 
+is that the information that Crimson Calendars accesses 
+is from the primary calendar resource, which generally 
+contains all the information in an individual’s Google 
+Calendar, however it is distinctly possible that no 
+events will be loaded if the primary calendar is empty.  
+Though this is a potential error it helps to make the 
+API calls on the site far more efficient.
+
+Upon arriving at the homepage after authenticating through 
+the Google window one should see their calendar information 
+displayed in the chart that dominates most the page. The page
+is constructed such that days of the week increase vertically
+while hours of the day (in 24hr format) increase horizontally
+. Both recurring and single instance events should be displayed 
+on this calendar, with no differentiation made between them. 
+All-day events will be marked as beginning at 0:00. No end 
+times are yet marked on this calendar and all event start 
+times are rounded down to the hour. This page is thus for 
+the most part purely informative. By click on either 'next week'
+or 'previous week' (note: refreshing will cause the calendar dates to 
+ change) a user can navigate to furture and past weeks
+with the date of each monday being displayed above the calendar.
+
+
+    There are two other pages to which a user can navigate, 
+the first of which is the calendars page. This page is meant
+again to be purely informational, providing users with the 
+extensive list of what calendars are used to gather data 
+about the vents display on the events page( covered later). 
+This list is meant to empower users to be able to quickly
+see whether or not the data which they are interested in
+is available. As this page is non-interactive there are 
+no features which a user needs to understand, aside from the
+ links to other page listed at the top of the page, which link
+ to the events page and the home page, respectively. 
+
+    The third and final page is by far the most significant. 
+By clicking the See Events link at the top of the page the
+user navigate to a page which display all of that days 
+events.  The user then should be able to navigate forward
+and backward through days using the ‘next’ and ‘previous’
+buttons, while the date of those events is listed at top.
+The displayed date is the date which the user
+is currently view events for. By clicking add the user
+is returned to the home page and after by clicking 
+the ‘add selected events’ link the event is displayed
+in the calendar chart. If the user refreshes the page 
+instead the same request is resent and thus the event 
+would be added in duplicate.  
+
+    As is plainly evident the usage of this site is built to
+ be very simplistic. Any user should be capable of adding 
+ a desired event with a modicum of effort. There is however
+, room for improvement in terms of practical usability of
+the site. 
+

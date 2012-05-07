@@ -1,0 +1,60 @@
+
+  <head>
+      <script type="text/javascript">
+        function init() {
+        
+        // initialize new AJAX object
+        var xhr = new XMLHttpRequest();
+        
+        
+        // prep the URL string
+        var url = "http://events.cs50.net/api/1.0/calendars?output=json";
+       
+       
+        // event handler
+        xhr.onreadystatechange = function() {
+            
+            // ensure that request did not fail
+        if (xhr.readyState == 4 && xhr.status == 200)
+        { 
+          // interpret response
+          var calendars = new Array();
+          calendars = eval(xhr.responseText);
+          
+          //display calendar
+          for(var i in calendars)
+          {
+              document.getElementById("list").innerHTML = document.getElementById("list").innerHTML + (calendars[i])['calname']+ "<a href=index.php>Add</a><br>" ;
+              document.getElementById("error").innerHTML = null;
+          }
+                
+        }
+             //error check
+        else if (xhr.readyState == 4 && xhr.status != 200)
+              document.getElementById("error").innerHTML = "Error: Could not access CS 50 Events API";
+           
+             
+
+             
+        }
+    
+        //send request
+        xhr.open("GET", url, true);
+        xhr.send();
+        }
+      </script>
+    </head>
+  <body onload="init()" >
+    <div style="text-align: center;">
+        Calendars Page
+    </div>
+    <div id='error'>
+    </div>
+    <div style="text-align: center;">
+      <a href= index.php>Home</a>
+      <a href= events.html>See Events</a>
+    </div>
+    <div id="list">
+    </div>
+  </body>
+</html>
