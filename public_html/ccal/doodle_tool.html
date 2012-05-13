@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+  <html>
+    <head>
+      <link href="css/style.css" rel="stylesheet" type="text/css">
+      <title>Crimson Calendar: Doodle Tool</title>
+    </head>
+    <body>
+      <div class="logo">
+        <a href="index.php"><img id ="logo" src="extras/harvard-logo.jpg" alt="Crimson Calendar"><h1 class="logo_text">Crimson Calendar</h1></a>
+      </div>
+
+      <div class="border_hor"></div>
+      <div class="border_ver"></div>
+
+      <div class="links">
+        <h1><a class="link_box" href= "index.php"> Home </a>
+        <a class="link_box" href= "events.html"> Events </a>
+        <a class="link_box" href= "calendars.html"> Calendars </a>
+        <a class="active_link_box" href= "doodle_tool.html"> Doodle Tool </a>
+        </h1>
+      </div>
+
+      <div class="body">
+        <div class="title">
+          <h2>Doodle Tool</h2>
+        </div>
+        <div class="text_background">
+          <h3>Copy and paste your Doodle Poll's Url here.</h3>
+        </div>
+        <form action="display_poll.php" method="get">
+          <input class="text_box" name="url" type="text">
+          <br>
+          <input class="submit" type="submit" value="Submit">
+        </form> 
+      </div>                
+    </body>
+  </html>

@@ -1,0 +1,248 @@
+
+/****************************************************************
+ * design.txt
+ * 
+ * Bobby Flitsch
+ * CS50 Final Project
+ * 
+ * Documentation for the technical implementation of the
+ * Doodle Tool for Crimson Calendar, my and Michael Casson's
+ * final project.
+ *
+ ****************************************************************/
+
+    I think the best way to describe the technical functionality
+ of the website will be to explain what happens with the code
+ and my design decisions in the order that they would show up
+ as someone navigates through the website.
+ 
+    The first thing a user sees when going to Crimson Calendar
+ (currently located at http://cloud.cs50.net/~mcasson) is the
+ home page. Although I did not code the functionality of this
+ page, or the events and calendars pages, I did the css for them,
+ so it would probably be best to discuss this first. This was
+ my first time doing css for a website, so it was a little tricky,
+ although the internet was very helpfull, in the description
+ of how to define class types. I used that for all of my css
+ because they were able to be used on any type of tag. I also
+ included some default attribute types, such as IMG and A:hover
+ because they were things I wanted to be the same accross the whole
+ site. (For reference, the style sheet may be found at 
+ "css/style.css" and the pages that use this css are the html
+ defined (and printed) by "index.php," "events.php," 
+ "calendars.php," "doodle_tool.php," "display_poll.php,"
+ "submit_poll.php," and "doodle-api/includes/apology.php."
+ 
+    Now for the implementation of my site. One of the links
+ I defined in the css ("Doodle Tool") will take you to
+ "doodle_tool.html." On this page is a form field. I decided
+ to go with a text field for submission of the required information
+ because of the way Doodle notifies its users to the creation
+ of doodle polls. When someone is prompted to complete a doodle
+ poll, they are done so via email. In this email is a url to
+ the doodle poll. Since this is the way it is ALWAYS done,
+ and that users will be most used to this, I figured it would
+ be easiest for users to copy and paste the url they recieve into
+ this text form. As long as this is the only time they have
+ to do this (which I made sure of) it will be the most convienient
+ method of authentication for the user.
+ 
+    Once the user submits this form, they are redirected to this
+ poll, displayed on "display_poll.php." A lot happens under the
+ hood for this to occur though.
+    
+    First, the necessary tokens for accessing information from
+ Doodle must be obtained. Because no "user" information needs
+ to be accessed, only a two-legged OAuth request is neccessary,
+ which is good, because the user was already prompted by Google
+ to access information. It would be tedious to have to allow
+ access twice (also, from my experience, almost noone uses doodle.com
+ as a registered user, since you don't need to register to start
+ or complete a poll. As well, there isn't really much usable
+ user information anyway). Since no redirect is necessary, the
+ program gets the poll information by escaping the url from
+ the submit form on the previous page (we are now in 
+ "display_poll.php") and entering it as an argument to the
+ function "aquire_poll($url)" which is defined in "doodle-api/poll.php."
+ 
+    This function has a few steps to acquire the poll information.
+ It first has to obtain a "request token" and then exchange this
+ request token for an "access token" which is used to access
+ the information from the api. This is done through a variety
+ of functions (namely "request_token()" and "access_token()"
+ which are defined, as well as all the other functionality
+ for generating and sending HTTP requests, in "doodle-api/
+ doodleClient.php").
+ 
+    In order for any of these requests to be sent, I had to
+ define an object type of an "HttpRequest" which is defined
+ in "doodle-api/includes/request.php." Although this differs
+ from the specification on php.com for this object type, it
+ was easier to define my own type for use on my own code. Each
+ of the variables in this object are used to generate the
+ different HTTP headers for each request.
+ 
+    The way that each of these requests are sent, are that
+ each of the functions in "doodle-api/doodleClient.php" define
+ the specific parameters for the Authorization header (as well
+ as the method and specfic url, among others) construct the
+ header, and then send the request with "send()." This function
+ sends the request by opening a socket with doodle.com, writes
+ the neccessary information, as formatted in the overlying
+ function (such as request_token()) and then closes the connection.
+ The remainder of the function formats the response from doodle.com
+ to be used in the next function.
+ 
+    After the access token is recieved, a request is then sent
+ to the Doodle API for the poll information (which is returned
+ as an XML object). This request is authorized using the acquired
+ access token and signed using the acquired token secret (along,
+ of course, with the consumer secret used in all signatures).
+ When the xml object is recieved, it needs to be formatted into
+ and array, which is done by "parse($poll)" which is defined
+ in "doodle-api/xml.php." This parses the xml into a structured
+ array that contains the poll information. This array is then returned
+ to display_poll.php, where it is used to display the poll.
+ 
+    The poll is displayed by accessing information in the
+ "keys" array that tells where information is in the "values"
+ arrary. The information from the "values" array is generally
+ what is used in printing html. The functionality for printing
+ the html for the poll is described in "display_poll()"
+ which is defined in "doodle-api/poll.php." This code may
+ be described as mostly all loops, variables assigned from
+ the "values" array, and function calls to "echo()" to print
+ these variables and the html tags to display this information.
+ This code is, for this reason, very straight-forward, however
+ there are a few details that are important to note:
+    
+    1st is the variable "$post" which is used to keep track of the 
+ Doodle API limitations. The limitations are as follows: Doodle
+ seems to have a character limit on the xml object that it returns
+ to the consumer. At a certain point, it just ends (if there
+ is A LOT of information to return) in the middle of an
+ <option> tag or </poll> tag, etc. and many error messages
+ will be displayed by the server. Therefore, it was important
+ to set a cut-off point, so that none of these messages will
+ be displayed. It may seem that I gave a VERY generous margin
+ of cut-off (25 post results between 175 and 200), however
+ I have filled polls where there have been over 30 times to check
+ off. With a lot of polls, if I just did the cut off at 200, and
+ a row ended at 199 post results, I would get a whole row of
+ error messages, before I broke the loop. This would be bad.
+ I wanted to set a limit that was not too forgiving, and would
+ have this problem, but I didn't want to cut off too soon,
+ and have barely any results posted. Because of this,
+ and all of my prior experience completing Doodle polls,
+ I decided that 175 was the best cut off number, making
+ it very unlikely to display error messages.
+ 
+    2nd, it is also important to notice the many different
+ conditions that are present in this function. Although there
+ is a LOT of code for one function, it is vital that my code
+ is VERY adaptive to different poll conditions. It needs to 
+ dynamically print out the html, with different row widths,
+ table values, etc. or the whole thing is very difficult,
+ if not impossible, to read. This would defeat the entire purpose
+ of the tool. These conditions are also in place for specific
+ instances where the code needs to search for different values
+ to display, such as well single time values are chosen, rather
+ than time ranges, or when the dispay limit has been reached
+ (as described above).
+ 
+    The biggest part of my code is the actual functionality
+ of the doodle tool, which is its ability to check the user's
+ Google calendar to check for conflicts with the doodle poll.
+ The functionality for this (in "check_times(), defined in
+ "display-poll.php") is started when the user clicks one
+ of the links on the poll page, redirecting the user back
+ to the same page, but with the url value of $_GET['goog']
+ set to 'true.'
+ 
+    First, the start and end times (or single times) for the
+ doodle event need to be remembered. Next, the start and end
+ times for each of the events on the user's primary calendar
+ need to be remembered. Because of the way Michael coded the
+ functionality of his code for the Google API, the calendar
+ information may only be accessed when the user is on "index.php,"
+ or they will be asked, yet again, to access information, and then
+ redirected back to the home page, ruining other functionality.
+ Because of this, I came up with the plan to include the code
+ for "index.php" within my code for "check_times()" and then
+ redirect away from "index.php" before any html was generated.
+ Thankfully, this plan worked great! The user clicks the link,
+ and in around 1-2 seconds (SO much faster than the 15 minutes
+ that it would normally take to fill out a large poll) the
+ form is filled.
+ 
+    Other than the necessity for including "index.php" within
+ "check_times()," there is one more thing that should be noted.
+ With all the posibilities, minute by minute forever, it seems,
+ at first, unlikely that all the possible intersections may
+ be covered by only 3 possiblilities. It is true though, and
+ I will explain how. Because I formatted all the times to unix
+ time, it is possible to compare each of the start and end times
+ directly, without having to worry about dates. For the 1st
+ possibility, if the google event starts before the doodle event,
+ and the end of the google event is after the start of the doodle
+ event, the google event will, no matter what, strattle the
+ start of the doodle event, and definitely intersect. For the
+ 2nd possibility, if the google event starts at the same time
+ as the doodle event, no matter when either of them end, there
+ WILL be a conflict. Finally, if the google event starts after
+ the doodle event starts, but before it ends, there MUST be a
+ conflict, no matter when the google event ends.
+ 
+    After all these events are checked, when the user is redirected
+ away from "index.php," they are redirected back to
+ "display_poll.php," as if they never left, and the poll is
+ pre-filled. All they have to do is fill out their name and
+ click "save." This submits the poll.
+ 
+    In order for the poll to be submitted, the function "submit_poll()"
+ (defined in "doodle-api/doodleClient.php") is started. This function
+ forms the HTTP request object similarly to the other functions
+ in this file. However, this function is different from the
+ others, because a body is included (stored in $request->data). This
+ needs to be generated as an xml object containing the information
+ (i.e. name and checked boxes submitted from "display_poll.php") that
+ the user submitted. This is done in the function "update_xml()"
+ which is defined in "doodle-api/xml.php." This generates a string
+ that represents the xml object as defined by the Doodle
+ specification. The request is then sent, and a confirmation
+ message is displayed, if no errors occurr. The user can then
+ go back to the poll they were just viewing, or they can
+ go back to "doodle_tool.html" to complete a new poll, through
+ two links located at the top of the page.
+ 
+    The above describes the functionality of the doodle tool,
+ however there are a few final notes I'd like to make. You will
+ notice a LOT of error checking throughout my code. Because there
+ are multiple requests to be made to the API, there are a lot
+ of places where the code could produce errors, or where a purposefully
+ difficult user could try to break my code. Therefore, I tried
+ to make sure that all the error messages a user recieved were
+ located on "doodle-api/includes/apology.php," rather than by
+ a message from the server at the top of the page. I tired
+ to be accountable for all the possible errors on my code. You
+ will also notice that some of the error messages don't display
+ an apology message, but rather just the text from a response
+ (these are when the error number is "500"). This is because,
+ one day when I was coding the poll submissions, Doodle was having
+ some server problems and responded with this message, that
+ an "internal server error" occurred. The message body that I
+ am posting as a result of this error is that message. They fixed
+ the problems later that day, but if they ever had any server
+ troubles in the future, I'd definitely want to display doodle's
+ message, rather than my own, to make sure the user knows, of course
+ that it's Doodle's fault, not mine.
+ 
+    Finally, you will notice that a file called "form_signature.php"
+ (located at "doodle-api/includes/form_signature.php") is included
+ in my submission, but is not active in my code at all. If you
+ read the comments on this file, I have explained why I have included
+ this, even though it is not functional in my program. I feel, as by the
+ reasons stated in these comments that I believe this function adds
+ to the scope of my project, for it involves a much more in-depth
+ knowledge of http requests than neccessary (since Doodle uses
+ https for their requests).

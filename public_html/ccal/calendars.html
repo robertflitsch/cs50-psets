@@ -1,5 +1,9 @@
+<!DOCTYPE html>
 
   <head>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <title>Crimson Calendar: Harvard Calendars</title>
+  
       <script type="text/javascript">
         function init() {
         
@@ -24,7 +28,7 @@
           //display calendar
           for(var i in calendars)
           {
-              document.getElementById("list").innerHTML = document.getElementById("list").innerHTML + (calendars[i])['calname']+ "<a href=index.php>Add</a><br>" ;
+              document.getElementById("list").innerHTML = document.getElementById("list").innerHTML + (calendars[i])['calname']+ "<br>" ;
               document.getElementById("error").innerHTML = null;
           }
                 
@@ -43,18 +47,35 @@
         xhr.send();
         }
       </script>
-    </head>
-  <body onload="init()" >
-    <div style="text-align: center;">
-        Calendars Page
+  </head>
+
+  <body onload="init()">
+
+    <div class="logo">
+      <a href="index.php"><img id ="logo" src="extras/harvard-logo.jpg" alt="Crimson Calendar"><h1 class="logo_text">Crimson Calendar</h1></a>
     </div>
-    <div id='error'>
+    
+    <div class="border_hor"></div>
+    <div class="border_ver"></div>
+
+    <div class="links">
+      <h1><a class="link_box" href= "index.php"> Home </a>
+      <a class="link_box" href= "events.html"> Events </a>
+      <a class="active_link_box" href= "calendars.html"> Calendars </a>
+      <a class="link_box" href= "doodle_tool.html"> Doodle Tool </a>
+      </h1>
     </div>
-    <div style="text-align: center;">
-      <a href= index.php>Home</a>
-      <a href= events.html>See Events</a>
-    </div>
-    <div id="list">
+
+    <div class="body">
+      <div class="title">
+        <h2>Harvard Calendars</h2>
+      </div>
+
+      <div id='error'>
+      </div>
+    
+      <div class="events_text" id="list">
+      </div>
     </div>
   </body>
 </html>

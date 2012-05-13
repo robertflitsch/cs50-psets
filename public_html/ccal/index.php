@@ -1,12 +1,31 @@
 <?
+    /*****************************************************
+     * index.php
+     *
+     * Displays the home page for Crimson Calendar.
+     * Also contains some of the code for pre-populating
+     * a doodle poll.
+     *
+     * PLEASE NOTE FOR GRADING:
+     * The code before the next "?>" has been somewhat
+     * edited and added to by Bobby. Much of it has
+     * been typed by Michael, but the code between the
+     * sections commented as such have been edited or
+     * added to by Bobby. Additionally all of the css
+     * for all the pages (minus the calendar display
+     * on the home page: I didn't want to mess with
+     * Michael's code when I wasn't with him) was done
+     * by Bobby.
+     *
+     *****************************************************/
+    
     session_start();
     
     
     //include needed files
     require_once "google-api-php-client/src/apiClient.php";
     require_once "google-api-php-client/src/contrib/apiCalendarService.php";
-
-    
+    require_once("doodle-api/includes/helpers.php");
     //create new API request
     $apiClient = new apiClient();
     $apiClient->setUseObjects(true);
@@ -40,69 +59,164 @@
        
  
     //to record the number of events
-    $counter=0;
+    $counter = 0;
     
     //retrieve primary calendar
     $events = $service->events->listEvents('primary');
    
+/* * * * * * * * * * * * * * * * * * * * * *
+ * Start of Bobby's editing and additions  *
+ * * * * * * * * * * * * * * * * * * * * * */
     
-    
-    //save events
+    //save event beginnings
     while(true) 
-      {
-      foreach ($events->getItems() as $event) {
-        
-        //save each event
-        if($event->getStart() != null)
+    {
+        foreach ($events->getItems() as $key => $event)
+        {
+            //save each event start
+            if($event->getStart() != NULL)
             {
-            $start = ($event->getStart()->getdateTime());
-            $year = intval($start[0].$start[1].$start[2].$start[3]) ; 
-            $month = intval($start[5].$start[6]) ;
-            $day = intval($start[8].$start[9]) ;
-            $hour = intval($start[11].$start[12]) ;
-            
-            //create arrays with similair index
-            
-            $events_list= array();
-            $events_list_start_unixtime[$counter] =  mktime($hour,0,0,$month,$day,$year);
-            $events_list_start_time[$counter] =  getdate(mktime($hour,0,0,$month,$day,$year));
-            $events_list_summary[$counter] =  $event->getSummary();
-            $events_recurring[$counter]= $event->getRecurrence();
-            
-            //increment number of events
-            $counter ++;
-            
-            }
+                $start = ($event->getStart()->getdateTime());
+                $year = intval($start[0].$start[1].$start[2].$start[3]) ; 
+                $month = intval($start[5].$start[6]) ;
+                $day = intval($start[8].$start[9]) ;
+                $hour = intval($start[11].$start[12]) ;
+                $minutes = intval($start[14].$start[15]);
 
-      }
-      $pageToken = $events->getNextPageToken();
-      if ($pageToken) {
-        $optParams = array('pageToken' => $pageToken);
-        $events = $service->events->listEvents('primary', $optParams);
-      } 
+                //create arrays with similair index
+                $events_list= array();
+                $events_list_start_unixtime[$counter] =  mktime($hour,0,0,$month,$day,$year);
+                $events_list_start_time[$counter] =  getdate(mktime($hour,0,0,$month,$day,$year));
+                $events_list_summary[$counter] =  $event->getSummary();
+                $events_recurring[$counter]= $event->getRecurrence();
+                $events_list_start_unixtime_for_doodle[$counter] =  mktime($hour,$minutes,0,$month,$day,$year);
+            }
+            
+            //save each event end
+            if($event->getEnd() != NULL)
+            {
+                $end = ($event->getEnd()->getdateTime());
+                $endyear = intval($end[0].$end[1].$end[2].$end[3]) ; 
+                $endmonth = intval($end[5].$end[6]) ;
+                $endday = intval($end[8].$end[9]) ;
+                $endhour = intval($end[11].$end[12]) ;
+                $endminutes = intval($end[14].$end[15]);
+                
+                //create arrays with similair index
+                $events_list= array();
+                $events_list_end_unixtime[$counter] =  mktime($endhour,$endminutes,0,$endmonth,$endday,$endyear);
+                
+                //increment number of events
+                $counter ++;
+            }
+        }
+    
+        $pageToken = $events->getNextPageToken();
+        
+        if ($pageToken)
+        {
+            $optParams = array('pageToken' => $pageToken);
+            $events = $service->events->listEvents('primary', $optParams);
+        } 
       
-      else 
-      {
-        break;
-      }
+        else 
+            break;
     }
+    
+    // if $doodle exists, then this code has been included in check_times
+    if(isset($doodle))
+    {
+        // loop through each doodle event
+        foreach($doodle['start'] as $dkey => $dvalue)
+        {
+            // boolean for matched event
+            $matched = false;
+            
+            // set doodle start and end values (unix time)
+            $ds = $dvalue;
+            $de = $doodle['end']["$dkey"];
+                       
+            // loop through each google event
+            foreach($events_list_start_unixtime_for_doodle as $gkey => $gvalue)
+            {
+                // set google start and end values
+                $gs = $gvalue;
+                $ge = $events_list_end_unixtime["$gkey"];
+                
+                // break loop if match found
+                if($matched == true)
+                    break;
+                
+                // intersection possibility 1
+                else if($ds < $gs && $de > $gs)
+                    $matched = true;
+                
+                // intersection possibility 2
+                else if($ds == $gs)
+                    $matched = true;
+                
+                // intersection possibility 3
+                else if($ds > $gs && $ds < $ge)
+                    $matched = true;
+            }
+            
+            // if match found, event is not free
+            if($matched == true)
+            {
+                $option[$dkey] = "0";
+            }    
+            
+            // if no intersection matched, then this doodle event is free
+            else
+                $option[$dkey] = "1";
+        }
+        
+        // initialize get string
+        $get = "display_poll.php?url=$url";
+        
+        // loop and create get requests that fill the form upon redirect
+        for($i = 1; $i <= $dkey; $i++)
+           $get .= "&option$i={$option[$i]}";
+        
+        // redirect back to display_poll before html is printed   
+        redirect("$get");
+    }
+    
+/* * * * * * * * * * * * * * * * * * * * * * * * *
+ * End of Bobby's editing and additions (except  *
+ * for the css following this code)              *
+ * * * * * * * * * * * * * * * * * * * * * * * * */
 
 ?>
-
-
 <!DOCTYPE html>
 
 <html>
   <head>
-  <style type="text/css" media="screen">   
-  </style>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <title>Crimson Calendar: Home Page</title>
   </head>
-  <body >
-    <div id ='title' style="text-align: center;">
-        Home Page
-    </div>
-    
-    <div>
+  <body>
+    <div class="logo">
+        <a href="index.php"><img id ="logo" alt="Crimson Calendar" src="extras/harvard-logo.jpg"><h1 class="logo_text">Crimson Calendar</h1></a>
+      </div>
+
+      <div class="border_hor"></div>
+      <div class="border_ver"></div>
+
+      <div class="links">
+        <h1><a class="active_link_box" href= "index.php"> Home </a>
+        <a class="link_box" href= "events.html"> Events </a>
+        <a class="link_box" href= "calendars.html"> Calendars </a>
+        <a class="link_box" href= "doodle_tool.html"> Doodle Tool </a>
+        </h1>
+      </div>
+
+      <div class="body">
+        <div class="title">
+          <h2>Home Page</h2>
+        </div>
+      
+      <div class="submit_message">
         <?
         
          //find current time
@@ -149,29 +263,26 @@
         
         //if the user has added an event display the option to display
         if(isset($_GET['startime']))
-          $warning  = "<p style='font-weight:bold;text-align:center;'>Please click below to display your event!<br><a href= index.php> Add Selected Event </a></p><br><br>";
+          $warning  = "Please click below to display your event!<br><a href= index.php> Add Selected Event </a>";
         else
           $warning="";  
-          
-        //display site links
-        echo("<p style='text-align:center;'> <a href= events.html> See Events </a>-----<a href= calendars.html>     See Calendars </a><a href= doodle.html>     Doodle Tool </a><br></p>".$warning ."<p style='text-align:center;'>");
         
         //date of the displayed monday
         $displaystr = date("l jS \of F Y", $monday ); 
         
+        // display warning(if exists)
+        if($warning != null)
+            echo("<h3>$warning</h3>");
+        
         //
         if($_SESSION['week']==0)
-            echo("This is the current week<br>"); 
+            echo("<h3>This is the current week</h3>"); 
         
-        /* display date for users*/
-        echo ("Week Starts on: $displaystr </p>"); 
-        echo("<br>");  
-        
-        //display links to increase, decrease or reset week
-        echo("<p style='text-align:left;'><a  href= index.php?week=-1 align='left'> Previous Week </a></p>");
-        echo("<p style='text-align:center;'><a href= index.php> This Week </a></p>");
-        echo("<p style='text-align:right;'><a href= index.php?week=1> Next Week </a></p>");
-        ?>
+        // display date for users
+        echo ("<h3>Week Starts on: $displaystr </h3>"); 
+       
+       ?>
+       <h3><a class="link_box" href= "index.php?week=-1"> Previous Week </a><a class="link_box" href= "index.php"> This Week </a><a class="link_box" href= "index.php?week=1"> Next Week </a></h3>
     </div>
     <br>
     <br>
@@ -180,9 +291,9 @@
           <?
             //prep top row of calendar
             echo("<tr style='width : 5000px;'>");
-            echo("<td style='width : 200px; text-align: center;'> Day\Time </td>");
+            echo("<td style='width : 200px, text-align: center;'> Day\Time </td>");
             for( $i=0  ; $i<24 ; $i++)
-            echo("<td style='width : 200px; text-align: center;'> $i  :00 </td>");
+            echo("<td style='width : 200px, text-align: center;'> $i  :00 </td>");
               
             
 
@@ -210,7 +321,7 @@
                 for($j=0 ; $j<24 ; $j++)
                 {
                     //print cell
-                    echo("<td id='".$i.$j."'style='width: 200px; height: 200px; text-align: center;'> ");
+                    echo("<td id='".$i.$j."' style='width: 200px; height: 200px; text-align: center;'> ");
                     
                     //prep needed cell time information
                     $cell_timestamp = $monday + ($j*(60*60)) + ($i*(24*60*60));
@@ -246,7 +357,8 @@
                   echo("</tr>");
              }                                                                        
           ?>            
-      </table>
+        </table>
+      </div>
     </div> 
   </body>
 </html>

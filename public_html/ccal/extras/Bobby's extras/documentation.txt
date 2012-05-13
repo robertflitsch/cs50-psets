@@ -1,0 +1,178 @@
+ 
+/****************************************************************
+ * documentation.txt
+ * 
+ * Bobby Flitsch
+ * CS50 Final Project
+ * 
+ * Documentation for the Doodle Tool on Crimson Calendar,
+ * my implementation for our final project.
+ *
+ ****************************************************************/
+    
+ 
+    The name of our website is called "Crimson Calendar." Its
+ main function is as a scheduling tool. Where Michael's
+ implementation was adding events directly from "Harvard
+ Events" to one's Google Calendar, my implementation was
+ using the Doodle RESTful API with the Google API to check
+ availability on a certain poll with one's Google Calendar.
+ Doodle is a visual scheduling tool. Its users may pick from
+ a variety of times for an event, which are proposed by an
+ initiator. Each time someone checks an event, a green box
+ shows up on their submission row. One can look down the collumns
+ to see the "good" times for doing an event.
+ 
+    An example that you can use to see this tool may be 
+ located at "http://doodle.com/gn6fmhbgzs5cmt8s" (this
+ is a poll that I made to test the project).
+ 
+    Our home page is currently located at:
+ "http://cloud.cs50.net/~mcasson." Upon submission of this
+ url to the browser, you will be redirected to Google for
+ authentication of your google account with the Google API.
+ Submit your username and passward and then "allow access"
+ to access the website. Once there, you will see the Crimson
+ Calendar Home Page. You will see your calendar displayed
+ and links at the top right to "Home," (active now) "Events"
+ and "Calendars." Although the functionality of these pages
+ was created by Michael in doing his part of the project,
+ I did the css for these pages to make them look nice. As
+ such, the functionality of them is not important to my
+ project, but you can see the css I did by clicking the
+ links to access these pages (the code for these are
+ "index.php," "events.html" and "calendars.html").
+ 
+    The last link located at the top right, however, is to
+ the "Doodle Tool." This is my part of the project. You may
+ access the tool by clicking on this link, which will redirect
+ you to "doodle_tool.html." When the page loads you will see
+ that the "Doodle Tool" link has now been hi-lighted and a
+ text field with a prompt to "Copy and paste your Doodle Poll's
+ Url here" are displayed.
+ 
+    (PLEASE NOTE: At any point during your use of the tool,
+ if you find that the google api asks you for authentication
+ again, even if you didn't leave the website, that just means
+ that your token has expired. Just allow access again, and
+ fill out the information as described below to get back
+ to the poll.)
+ 
+    Whenever a user is requested to complete a doodle poll,
+ they are prompted to do this via email. This email always
+ contains a link to this poll. This is the url that the user
+ has been prompted to copy into this box. In testing the code, you
+ may use the following links:
+ 
+ "http://doodle.com/gn6fmhbgzs5cmt8s" (the poll suggested before)
+ and
+ "http://www.doodle.com/vkhda6n9np76kydi".
+ 
+    The following paragraph describes exactly what you should
+ see if following the first link.
+ 
+    When you paste the first url into the text box and click
+ "Submit," you will be redirected to "display_poll.php." This
+ page displays the poll for the user in a very similar fashion
+ to Doodle.com. The name of the poll ("test2" for this poll)
+ is displayed in a red box above the poll. The top row of the
+ display lists the number of participants who have already
+ submitted a response and each of the dates and specific
+ times in question for the event. Below that is each of the
+ participants' submissions. First, each of the participants'
+ names are listed. Then, just like on doodle's website,
+ the "good" times are marked with a green check box and the
+ "bad" times are marked with a red box. Below the participant
+ submissions is a blank form field, for any users who may
+ want to manually fill out a doodle poll. This form field
+ consists of a text box and a check box (1 for each of the
+ time posibilities). If the user checks a box, just like
+ the boxes above, this is a "good" time. Below this, each
+ of the afirmative responses for each time is counted up, 
+ and displayed. This way, one can quickly see which times had
+ the most "yes" responses. Finally, a "save" button is present,
+ which, upon clicking (as long as a name is given, for this is
+ required for submission to Doodle) submits the response to Doodle,
+ and it is added to the actual poll.
+ 
+    Displaying this page was the first big task of my project.
+ Michael, along with other people who used an API, had to
+ have code that authenticated requests to the API (many of
+ them using OAuth) similar to this project. The specification
+ for doodle's API (found at "doodle.com/xsd1/RESTfulDoodle.pdf"
+ and "doodle.com/xsd1/AAforRESTfulDoodle.pdf") however, assumes
+ that the programmer has experience forming HTTP requests to
+ OAuth, which I have none. Additionally, doodle did not provide
+ me with any code, so I had to figure out on my own how to
+ form my own requests, include the correct request parameters,
+ send the request, etc.
+ 
+    The next big part of the project may be seen in the two
+ links on "display_poll.php" which say "Click here to complete
+ Doodle Poll with your Google Calendar information." Upon clicking
+ this link, the poll you see in front of you will be reloaded,
+ however the checkboxes will be checked accordingly with your
+ availibility based off of your Google Calendar. If events
+ conflict, then a box will not be checked. This will happen
+ when either of the links are clicked. The one at the top left
+ is there because it is probably noticed first, and the 2nd
+ at the bottom is added for convienience. If the poll is large
+ it is there so the user doesn't have to scroll all the way
+ back up to the top.
+ 
+    At present, if you are testing the tool, it is very possible
+ that no conflicts exist on your Google Calendar. This poll
+ is good for testing because it has 8 times of multiple different
+ lengths and dates. I will include the event's times below,
+ for your convienience, that you may test whether the tool
+ works or not, however you would like.
+ 
+ January 10, 2012:  2pm-3pm
+ January 18, 2012:  3pm-4pm
+ January 31, 2012:  6pm-6:30pm
+ January 31, 2012:  6:30pm-7pm
+ February 9, 2012:  5pm-7pm
+ February 15, 2012: 2pm-3pm
+ February 15, 2012: 3pm-4pm
+ February 15, 2012: 6:30pm-7pm
+ 
+    Once a user has completed a poll, and filled in a name,
+ they may click "save" to submit their response. They will
+ then be redirected (if they did it correctly) to a submission
+ confirmation at "submit_poll.php." At the top left will be
+ two links, one back to the poll they just submitted to at
+ "display_poll.php" and one back to "doodle_tool.html" to
+ complete another poll.
+ 
+    If you go back to "doodle_tool.html" and enter in the
+ second link provided above: "http://www.doodle.com/vkhda6n9np76kydi"
+ you can see 2 other important features of "display_poll.php."
+ If you view this poll on Crimson Calendar, 30 participants
+ will be displayed. If you view the actual poll on doodle.com,
+ however, you will notice more than 30 participants have
+ completed this poll. This is due to an unfortunate, unsolvable
+ limitation to the Doodle API. There is a character limit
+ to the xml object that doodle returns with the poll information.
+ This limits polls, as discribed by the disclaimer seen below
+ the poll, to about 200 post results. It is not a definite
+ amount because of the nature of a character limit. Because
+ lengths of participants names may differ, the display limit
+ may be different for each poll. Importantly, however, the
+ tool still functions fine! Responses may still be submitted
+ to Doodle, but they just can't all be displayed. It is an
+ unfortunate problem, but thankfully it seems to be Doodle's
+ fault, not mine.
+    
+    The second important functionality with this poll display
+ is that, when more than 10 participants respond to the poll,
+ the event dates and times are also displayed at the bottom
+ of the poll information, for scrolling convienience to the
+ user.
+ 
+    This tool is purposful and useful in its convienience.
+ As a frequest user of Doodle.com, I am constantly bothered
+ by the tedium of filling multiple posts for the same times
+ and switching between tabs to view my calendar and the doodle
+ poll. This tool makes this process much faster and much more
+ convienient, thus making the doodle poll even more useful!
+

@@ -1,6 +1,11 @@
-<html>
-  <head>
-  <script type= "text/javascript">
+<!DOCTYPE html>
+  
+  <html>
+    <head>
+      <link href="css/style.css" rel="stylesheet" type="text/css">
+      <title>Crimson Calendar: Harvard Events</title>
+  
+   <script type= "text/javascript">
 
      //set date to current
      var day = 0;
@@ -87,23 +92,39 @@
     
      
      </script>
-  </head>
-  <body onload="init()"  >
+    </head>
+    <body onload="init()">
 
-    <div id ='title' style="text-align: center;">
-       Events Page
-    </div>
-    <div style="text-align: center;" id="date">
-    </div>
-    <div style="text-align: center;">
-      <button type="button" onclick="subtract();init()">Previous</button>
-      <a href= index.php>Home</a>
-      <a href= calendars.html>See Calendars</a>
-      <button type="button" onclick="add();init()">Next</button>
+      <div class="logo">
+        <a href="index.php"><img id ="logo" src="extras/harvard-logo.jpg" alt="Crimson Calendar"><h1 class="logo_text">Crimson Calendar</h1></a>
+      </div>
 
-    </div>
-    <div id="display">
-     
-    </div>
-  </body>
-</html>
+      <div class="border_hor"></div>
+      <div class="border_ver"></div>
+
+      <div class="links">
+        <h1><a class="link_box" href= "index.php"> Home </a>
+        <a class="active_link_box" href= "events.html"> Events </a>
+        <a class="link_box" href= "calendars.html"> Calendars </a>
+        <a class="link_box" href= "doodle_tool.html"> Doodle Tool </a>
+        </h1>
+      </div>
+
+      <div class="body">
+        <div class="title">
+          <h2>Harvard Events</h2>
+        </div>
+
+        <div>
+          <button class="prev_button" type="button" onclick="subtract();init()">Previous Day</button>
+          <button class="next_button" type="button" onclick="add();init()">Next Day</button>
+        </div>
+
+        <div class="events_date" id="date">
+        </div>
+
+        <div class="events_text" id="display">  
+        </div>
+      </div>
+    </body>
+  </html>
